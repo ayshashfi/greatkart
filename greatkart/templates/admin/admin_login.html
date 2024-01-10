@@ -1,0 +1,95 @@
+{%load static%}
+{% csrf_token %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>GreatKart | One of the Biggest Online Shopping Platform</title>
+        <meta http-equiv="x-ua-compatible" content="ie=edge" />
+        <meta name="description" content="" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta property="og:title" content="" />
+        <meta property="og:type" content="" />
+        <meta property="og:url" content="" />
+        <meta property="og:image" content="" />
+        <!-- Favicon -->
+        <link rel="shortcut icon" type="image/x-icon" href={%static "images/favicon.ico"%} />
+        <!-- Template CSS -->
+        <link href={%static 'assets-admin/css/main.css'%} rel="stylesheet" type="text/css" />
+
+        <style>
+            .btn-primary,  .btn-primary:active, .btn-primary:visited {
+                background-color: #1E90FF !important;
+            }
+
+            .btn-primary:hover{
+                background-color: #4169E1 !important;
+            }
+            .form-control {
+                margin-bottom: 10px; 
+            }
+        </style>
+    </head>
+
+    <body>
+        <main>
+            <header class="main-header style-2 navbar">
+                <div class="col-brand">
+                    <a href="index.html" class="brand-wrap">
+                        <img src={%static 'images\logo.png'%} class="logo" alt="GreatKart logo" />
+                      
+                    </a>
+                </div>
+                
+            </header>
+            <section class="content-main mt-80 mb-80">
+                <div class="card mx-auto card-login">
+                    <div class="card-body">
+                        {% for message in messages %}
+                        <div class="alert alert-success" role="alert">
+                            {{message}}
+                          </div>
+                        {% endfor %}
+                        
+                        <h4 class="card-title text-center mb-4">ADMIN LOGIN</h4>
+                       
+                        <form action="{% url 'admin_login'%}" method="POST">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <input class="form-control" name="email" placeholder="Email Addrerss" type="Email" />
+                            </div>
+                            <!-- form-group// -->
+                            <div class="mb-3">
+                                <input class="form-control" name='password' placeholder="Password" type="password" />
+                            </div>
+                            <!-- form-group// -->
+                            <div class="mb-3">
+                                <a href="{% url 'forgotPassword'%}" class="float-end font-sm text-muted">Forgot password?</a>
+                                
+                            </div>
+                            <!-- form-group form-check .// -->
+                            <div class="mb-12 align-items-center " >
+                                <button type="submit" class="btn btn-primary w-100 " style="text-align:left; padding-left:130px">Login</button>
+                            </div>
+                            <!-- form-group// -->
+                        </form>
+                    </div>
+                </div>
+            </section>
+            <footer class="main-footer text-center">
+                <p class="font-xs">
+                    <script>
+                        document.write(new Date().getFullYear());
+                    </script>
+                    &copy; GreatKart
+                </p>
+                <p class="font-xs mb-30">All rights reserved</p>
+            </footer>
+        </main>
+        <script src="{% static "assets-admin/js/vendors/jquery-3.6.0.min.js" %}"></script>
+        <script src="{% static "assets-admin/js/vendors/bootstrap.bundle.min.js" %}"></script>
+        <script src="{% static "assets-admin/js/vendors/jquery.fullscreen.min.js" %}"></script>
+        <!-- Main Script -->
+        <script src="{% static "assets-admin/js/main.js" type="text/javascript" %}"></script>
+    </body>
+</html>

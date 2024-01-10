@@ -1,0 +1,339 @@
+{%extends 'admin/admin_base.html'%}
+{%load static%}
+{% load mathfilters %}
+
+
+{% block content%}
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Products</h2>
+           
+        </div>
+        <div class="col-lg-2 col-6 col-md-3">
+            <a href="#" data-bs-toggle="modal" data-bs-target="#addCategory">
+                <button type="submit" class="btn btn-primary"><i class="ti ti-plus"></i> Add product </button>
+
+            </a>
+        </div>
+    </div>
+    <div class="card mb-4">
+        
+        <!-- card-header end// -->
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr class="text-uppercase">
+                            <th scope="col">Id</th>
+                            <th scope="col">Image</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Price</th>
+                            {% comment %} <th scope="col">Description</th> {% endcomment %}
+                            <th scope="col">Offer</th> 
+                            <th scope="col">Variants</th>
+                            <th scope="col">Upload Image</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in product_page %}
+
+
+                        <tr class="text-uppercase">
+                            <td style="text-align: center;"><b>{{user.id}}</td>
+                                <td>
+                                    <div style="width: 50px;" class="overflow-hidden">
+                                        <img class="w-100" src=" {{user.images.url}} " alt="">
+                                    </div>
+                                </td>
+                            <td><b>{{ user.product_name }}</td>
+                            <td><b>{{ user.category.category_name}}</td>
+                                {% if user.offer %}
+                            <td > <span style="color:red;"><del><b>₹{{ user.product_price }} </del></span><span style="color:white;">-</span> <span style="color:green;">
+                                <b>₹{{ user.product_price|sub:user.offer.discount_amount }}</span></td> 
+                                {% else %} 
+                            <td ><span style="color:green;"><b>₹{{ user.product_price }}</b></span> </td> 
+                                 {% endif %} 
+                                {% if user.offer %}
+                                <td ><b>{{ user.offer.offer_name}}</td>
+                                {% else %}    
+                                <td ><b>No Offer</td>
+                                {% endif %}    
+                            
+                                    {% comment %} <td><b>{{ user.description}}</td> {% endcomment %}
+                            
+                                <td><a href="{% url 'product_view' user.id %}"><span class="badge rounded-pill alert-View btn bg-secondary ">View</span> </a></td>
+                                <td> <a href="{% url 'image_list' user.id %}"><button type="button" class="btn btn c"
+                                    style="background-color: rgb(86, 168, 255); color:rgb(255, 255, 255)"
+                                    data-bs-toggle="modal">
+                                    <i class="ti ti-photo"></i>
+                                    Images
+                                </button></a></td>
+                            
+                            <td>
+                                 <!-- Button trigger modal -->
+                                 <button type="button" class="btn btn spacer c"
+                                 style="background-color: rgb(246, 250, 10); color:rgb(102, 94, 94)"
+                                 onclick="showEditModal({{ user.id }})">
+                                 <i class="ti ti-edit"></i> EDIT
+                             </button>
+
+                             <!-- JavaScript Function to Show Edit Modal -->
+                           
+                             <script>
+                                function showEditModal(userId) {
+                                    var modal = document.getElementById("confirmEdit" + userId);
+                                    modal.style.display = "block";
+                                }
+                            </script>
+
+                            <script>
+                                function closeEditModal(userId) {
+                                    var modal = document.getElementById("confirmEdit" + userId);
+                                    modal.style.display = "none";
+                                }
+                            </script>
+                        
+
+                            
+                             {% if user.is_available %}
+                             <!-- Delete action -->
+                             <a href="#" class="btn btn-md rounded font-sm bg-danger" onclick="openModal('confirmationModal{{ user.id }}', 'Confirmation Delete item', 'delete')">Unlist</a>
+                         {% else %}
+                             <!-- Add action -->
+                             <a href="#" class="btn btn-md rounded font-sm" onclick="openModal('confirmationModal{{ user.id }}', 'Confirmation Add item', 'add')">List</a>
+                         {% endif %}
+                               
+
+
+
+                            </td>
+
+
+                        </tr>
+
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- table-responsive//end -->
+        </div>
+        <!-- card-body end// -->
+    </div>
+    <div class="pagination-area mt-30 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                {%for i in page_nums%}
+                <li class="page-item active"><a class="page-link" href="?page={{forloop.counter}}">{{forloop.counter}}</a></li>
+                {%endfor%}
+                
+                <li class="page-item active">
+                    <a class="page-link " href="?page={{product_page.paginator.num_pages}}"><i class="material-icons md-chevron_right"></i></a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</section>
+<div class="modal fade" id="addCategory" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Add Product</h1>
+                <br>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <form action="{% url 'addproduct' %}" enctype="multipart/form-data" method="POST">
+                    {% csrf_token %}
+                    <div style="width: 100px;" class="">
+                    </div>
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Name</label>
+                        <input name="product_name" value="" type="text" id="form3Example3cg"
+                            class="form-control form-control-lg" />
+                    </div>
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Price</label>
+                        <input name="product_price" value="" type="text" id="form3Example3cg"
+                            class="form-control form-control-lg" />
+                    </div>
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Image</label>
+                        <input name="image" type="file"
+                            accept="image/png, image/jpeg, image/svg, image/avif, image/WEBP" class="form-control"
+                            id="image-input" />
+                        <small id="image-error" class="text-danger text-center"></small>
+                    </div>
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Category</label>
+                        <select class="form-select" name="category">
+                            {% for c in categories %}
+                            <option value="{{c.id}}">{{c.category_name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Offer</label>
+                        <select class="form-select" name="offer">
+                            <option value="">No offer</option>
+                            {% for c in offer %}
+                                <option value="{{ c.id }}">{{ c.offer_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Description</label>
+                        <input name='description' value="" type="text" id="form3Example3cg"
+                            class="form-control form-control-lg" />
+                    </div>
+
+                    <div class="d-flex justify-content-center">
+                        <button type="submit" class="btn btn-primary text-center "
+                            type="submit">Save </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% for user in product_page %}
+<div class="modal" id="confirmEdit{{ user.id }}">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title fs-5" id="exampleModalLabel">Edit Product</h3>
+                <button type="button" class="btn-close" onclick="closeEditModal({{ user.id }})"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'product_edit' user.id %}" enctype="multipart/form-data" method="POST">
+                    {% csrf_token %}
+                   
+                    <div style="width: 100px;" class=""></div>
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Name</label>
+                        <input name="product_name" value="{{ user.product_name }}" type="text"
+                            id="form3Example3cg" class="form-control form-control-lg" />
+                    </div>
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Price</label>
+                        <input name="product_price" value="{{ user.product_price }}" type="text"
+                            id="form3Example3cg" class="form-control form-control-lg" />
+
+                    </div>
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Image</label>
+                        <br>
+                        {% if user.images %}
+                            <img id="currentImage" src="{{ user.images.url }}" alt="Current Image" style="max-width: 100px; max-height: 100px;">
+                        {% endif %}
+                        
+                        <input name="image" type="file" accept="image/png, image/jpeg, image/svg" class="form-control" id="image-inputs" onchange="displaySelectedImage(this)" />
+                        <small id="image-errors" class="text-danger text-center"></small>
+                    </div>
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Category</label>
+                        <select class="form-select" name="category">
+                            {% for c in categories %}
+                                {% if c.categories == user.category.category_name %}
+                                    <option value="{{ c.id }}" selected>{{ c.category_name }}</option>
+                                {% else %}
+                                    <option value="{{ c.id }}">{{ c.category_name }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-outline mb-4">
+                       <label class="form-label" for="form3Example3cg">offer</label>
+                       <select class="form-select" name="offer">
+                        <option value="" {% if not user.offer %}selected{% endif %}>No offer</option>
+                        {% for c in offer %}
+                            <option value="{{ c.id }}" {% if user.offer and c.offer_name == user.offer.offer_name %}selected{% endif %}>
+                                {{ c.offer_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    
+                    
+                   </div> 
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Description</label>
+                        <input name='description' value="{{user.description}}" type="text"
+                            id="form3Example3cg" class="form-control form-control-lg" />
+                            
+
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <button type="submit"
+                            class="btn btn-primary text-center"
+                            type="submit">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="confirmationModal{{ user.id }}" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+           
+            <h4>Confirmation Block user</h4>
+        </div>
+        <div class="modal-body">
+            <h6 style="color: red">Are you sure Block this user?</h6>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('confirmationModal{{ user.id}}')">Cancel</button>
+            <a href="{% url 'product_delete' user.id %}">
+                <button type="button" class="btn btn-primary">Confirm</button>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to open the modal
+    function openModal(modalId, modalTitle, buttonLabel) {
+        var modal = document.getElementById(modalId);
+        var modalHeader = modal.querySelector(".modal-header");
+        var modalBody = modal.querySelector(".modal-body");
+        modalHeader.querySelector("h4").textContent = modalTitle;
+        modalBody.querySelector("h6").textContent = `Are you sure ${buttonLabel} this item?`;
+        
+        modal.style.display = 'block';
+    }
+
+    // Function to close the modal
+    function closeModal(modalId) {
+        var modal = document.getElementById(modalId);
+        modal.style.display = 'none';
+    }
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+    function displaySelectedImage(input) {
+        var fileInput = input;
+        var img = document.getElementById('currentImage');
+
+        if (fileInput.files && fileInput.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                img.src = e.target.result;
+            };
+
+            reader.readAsDataURL(fileInput.files[0]);
+        }
+    }
+</script>
+
+{% endfor %}
+{%endblock content%}

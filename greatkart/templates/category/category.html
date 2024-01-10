@@ -1,0 +1,253 @@
+{%extends 'admin/admin_base.html'%}
+{load static}
+
+
+{% block content%}
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Category</h2>
+           
+        </div>
+        <div class="col-lg-2 col-6 col-md-3">
+            <a href="#" data-bs-toggle="modal" data-bs-target="#addCategory">
+                <button type="submit" class="btn btn-primary"> Add Category </button>
+
+            </a>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row gx-3">
+                <div class="col-lg-4 col-md-6 me-auto">
+                    <div class="input-group">
+                        <div class="form-outline">
+                            <form action="{% url 'category_search' %}" method="POST">
+                            {% csrf_token %}
+                                <div>
+
+                                    <input type="search" placeholder="Search..." id="form1" name="search" class="form-control" />
+                                    
+                                    <button type="submit" class="btn btn-primary" style="postion:absolute; left:190px;bottom:40px; height:40px;">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            </form>
+                      </div>
+                </div>
+                
+               
+            </div>
+        </header>
+        <!-- card-header end// -->
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr class="text-uppercase">
+                            <th scope="col">id</th>
+                            <th scope="col">image</th>
+                            <th scope="col">Category name</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in product_page %}
+                        <tr class="text-uppercase">
+                            <td> {{c.id}} </td>
+                            <td>
+                                <div style="width: 50px;" class="overflow-hidden">
+                                    <img class="w-100" src=" {{c.cat_image.url}} " alt="">
+                                </div>
+                            </td>
+                            <td> {{c.category_name}} </td>
+                            <td> {{c.description}} </td>
+                            <td>
+                                <!-- Button trigger modal -->
+                                <button type="button" class="btn btn spacer c"
+                                    style="background-color: rgb(246, 250, 10); color:rgb(102, 94, 94)"
+                                    data-bs-toggle="modal" data-bs-target="#confirmEdit{{forloop.counter}}"><i
+                                        class="ti ti-edit"></i>
+                                    EDIT
+                                </button>
+
+
+
+
+
+
+                                {% if c.is_available %}
+                                <!-- Delete action -->
+                                <a href="#" class="btn btn-md rounded font-sm bg-danger" onclick="openModal('confirmationModal{{ c.slug }}', 'Confirmation Delete item', 'delete')">Unlist</a>
+                            {% else %}
+                                <!-- Add action -->
+                                <a href="#" class="btn btn-md rounded font-sm" onclick="openModal('confirmationModal{{ c.slug }}', 'Confirmation Add item', 'add')">List</a>
+                            {% endif %}
+                            </td>
+                            <!-- Modal  for delete the Category -->
+                            
+
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- table-responsive//end -->
+        </div>
+        <!-- card-body end// -->
+    </div>
+    <div class="pagination-area mt-30 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                {%for i in page_nums%}
+                <li class="page-item active"><a class="page-link" href="?page={{forloop.counter}}">{{forloop.counter}}</a></li>
+                {%endfor%}
+                
+                <li class="page-item active">
+                    <a class="page-link " href="?page={{product_page.paginator.num_pages}}"><i class="material-icons md-chevron_right"></i></a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</section>
+<div class="modal fade" id="addCategory" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Add Product</h1>
+                <br>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <form action="{% url 'add_category' %}" enctype="multipart/form-data" method="POST">
+                    {% csrf_token %}
+                    <div style="width: 100px;" class="">
+                    </div>
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Name</label>
+                        <input name='category_name' value="" type="text" id="form3Example3cg"
+                            class="form-control form-control-lg" />
+                    </div>
+
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Image</label>
+                        <input name="image" type="file"
+                            accept="image/png, image/jpeg, image/svg, image/avif, image/WEBP" class="form-control"
+                            id="image-input" />
+                        <small id="image-error" class="text-danger text-center"></small>
+                    </div>
+
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Description</label>
+                        <input name='description' value="" type="text" id="form3Example3cg"
+                            class="form-control form-control-lg" />
+                    </div>
+
+                    <div class="d-flex justify-content-center">
+                        <button type="submit" class="btn btn-primary "
+                            type="submit">Save </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% for c in categories %}
+<div id="confirmationModal{{ c.slug }}" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+           
+            <h4>Confirmation Block user</h4>
+        </div>
+        <div class="modal-body">
+            <h6 style="color: red">Are you sure Block this user?</h6>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('confirmationModal{{ c.slug }}')">Cancel</button>
+            <a href="{% url 'deletecategory' c.slug %}">
+                <button type="button" class="btn btn-primary">Confirm</button>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to open the modal
+    function openModal(modalId, modalTitle, buttonLabel) {
+        var modal = document.getElementById(modalId);
+        var modalHeader = modal.querySelector(".modal-header");
+        var modalBody = modal.querySelector(".modal-body");
+        modalHeader.querySelector("h4").textContent = modalTitle;
+        modalBody.querySelector("h6").textContent = `Are you sure ${buttonLabel} this item?`;
+        
+        modal.style.display = 'block';
+    }
+
+    // Function to close the modal
+    function closeModal(modalId) {
+        var modal = document.getElementById(modalId);
+        modal.style.display = 'none';
+    }
+</script>
+<div class="modal fade" id="confirmEdit{{forloop.counter}}" tabindex="-1"
+aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title fs-5" id="exampleModalLabel">Edit Category</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'editcategory' c.slug %}"
+                    enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div style="width: 100px;"
+                        class="card-header category-img position-relative overflow-hidden bg-transparent border p-0">
+                        <img class="img-fluid w-100" src="{{c.cat_image.url}} "
+                            alt="">
+                    </div>
+
+                    <div class="form-outline mb-4">
+                        <input name="image" type="file"
+                            accept="image/png, image/jpeg, image/svg"
+                            class="form-control" id="image-inputs" />
+                        <small id="image-errors"
+                            class="text-danger text-center"></small>
+                    </div>
+
+                    <div class="form-outline mb-4">
+                        <input name='category_name' value="{{c.category_name}}" type="text"
+                            id="form3Example3cg" class="form-control form-control-lg" />
+                        <label class="form-label" for="form3Example3cg">Category
+                            name</label>
+                    </div>
+                    <div class="form-outline mb-4">
+                        <input name='description'
+                            value="{{c.description}}" type="text"
+                            id="form3Example3cg" class="form-control form-control-lg" />
+                        <label class="form-label"
+                            for="form3Example3cg">Description</label>
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <button type="submit"
+                            class="btn btn-primary btn-lg gradient-custom-4 w-50 text-light"
+                            type="submit">Save Changes</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endfor %}
+{%endblock content%}

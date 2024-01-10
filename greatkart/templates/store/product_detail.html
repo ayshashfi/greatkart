@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="section-content padding-y bg">
+    <div class="container">
+
+        <!-- ============================ COMPONENT 1 ================================= -->
+        <div class="card">
+            {% if single_product.is_active %}
+            <div class="row no-gutters">
+                <aside class="col-md-6">
+                    <article class="gallery-wrap">
+                        <div class="img-big-wrap mainImage">
+                            <center><img src="{{ single_product.images.url }}"></center>
+                        </div> <!-- img-big-wrap.// -->
+                    </article> <!-- gallery-wrap .end// -->
+                    <ul class="thumb">
+                        <li>
+                            <a href="{{ single_product.images.url }}" target="mainImage"><img src="{{ single_product.images.url }}" alt="Product Image"></a>
+                            {% for i in product_gallery %}
+                            <a href="{{i.image.url}}" target="mainImage"><img src="{{i.image.url}}" alt="Product Image"></a>
+                            {% endfor %}
+                        </li>
+                    </ul>
+                </aside>
+                <main class="col-md-6 border-left">
+                    <form action="{% url 'add_cart' single_product.id %}" method="POST">
+                        {% csrf_token %}
+                        <!-- Include hidden input fields here -->
+                        <input type="hidden" id="selectedColor" name="color" value="">
+                        <input type="hidden" id="selectedSize" name="size" value="">
+                        <article class="content-body">
+                            <h2 class="title">{{ single_product.product_name }}</h2>
+                            <div class="rating-star">
+                                <span>
+                                    <i class="fa fa-star{% if single_product.averageReview < 0.5 %}-o{% elif single_product.averageReview >= 0.5 and single_product.averageReview < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
+                                    <i class="fa fa-star{% if single_product.averageReview < 1.5 %}-o{% elif single_product.averageReview >= 1.5 and single_product.averageReview < 2 %}-half-o {% endif %}" aria-hidden="true"></i>
+                                    <i class="fa fa-star{% if single_product.averageReview < 2.5 %}-o{% elif single_product.averageReview >= 2.5 and single_product.averageReview < 3 %}-half-o {% endif %}" aria-hidden="true"></i>
+                                    <i class="fa fa-star{% if single_product.averageReview < 3.5 %}-o{% elif single_product.averageReview >= 3.5 and single_product.averageReview < 4 %}-half-o {% endif %}" aria-hidden="true"></i>
+                                    <i class="fa fa-star{% if single_product.averageReview < 4.5 %}-o{% elif single_product.averageReview >= 4.5 and single_product.averageReview < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
+                                    <span>{{single_product.countReview}} reviews</span>
+                                </span>
+                            </div>
+                            <div class="mb-3">
+                                {% if product_offer %}
+                                    <p class="original-price">
+                                        Original Price: ₹<b>{{ single_product.product_price }}</b>
+                                    </p>
+                                    <p class="discounted-text">
+                                        Offer Price: ₹<b>{{ discounted_price }}</b>
+                                    </p>
+                                {% else %}
+                                    <p class="original-price">
+                                        Price: ₹<b>{{ single_product.product_price }}</b>
+                                    </p>
+                                {% endif %}
+                            </div>
+                            
+                            <style>
+                                /* Style for the cross mark and bold text */
+                                .cross-mark, .original-price {
+                                    text-decoration: none;
+                                    font-weight: bold;
+                                    margin-bottom: 5px; /* Adjust spacing as needed */
+                                }
+                            
+                                /* Style for the discounted price */
+                                .discounted-text {
+                                    color: green;
+                                }
+                            </style>
+                 
+                            <p><b>Product Description:</b>{{ single_product.description }}</p>
+                            <hr>
+                            <div class="row">
+                                <div class="item-option-select">
+                                    <h6>Choose Color</h6>
+                                    <select name="color" class="form-control" required id="colorDropdown">
+                                        <option value="" disabled selected>Select</option>
+                                        {% for item in color_variations %}
+                                        <option value="{{ item.color.color_name|lower }}" data-sizes="{% for size in item.sizes %}{{ size|lower }}{% if not forloop.last %},{% endif %}{% endfor %}">{{ item.color.color_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="item-option-select">
+                                    <h6>Select Size</h6>
+                                    <select name="size" class="form-control" required id="sizeDropdown">
+                                        <option value="" disabled selected>Select</option>
+                                        {% for item in color_variations %}
+                                            {% for size in item.sizes %}
+                                                <option value="{{ size|lower }}" data-color="{{ item.color.color_name|lower }}" style="display: none;">{{ size }}</option>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+							
+                            <!-- Include jQuery -->
+                            <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+                            <!-- Add this script to your template -->
+                            <script>
+                                $(document).ready(function() {
+                                    // Event handler for color dropdown change
+                                    $('#colorDropdown').change(function() {
+                                        var selectedColor = $(this).val();
+                                        // Hide all size options
+                                        $('#sizeDropdown option').hide();
+                                        // Show size options for the selected color
+                                        $('#sizeDropdown option[data-color="' + selectedColor + '"]').show();
+                                        // Reset size dropdown to the default
+                                        $('#sizeDropdown').val('').change();
+                                        // Update hidden input with selected color
+                                        $('#selectedColor').val(selectedColor);
+                                        // Log the selected color
+                                        console.log('Selected Color:', selectedColor);
+                                    });
+
+                                    // Event handler for size dropdown change
+                                    $('#sizeDropdown').change(function() {
+                                        var selectedSize = $(this).val();
+                                        // Update hidden input with selected size
+                                        $('#selectedSize').val(selectedSize);
+                                        // Log the selected size
+                                        console.log('Selected Size:', selectedSize);
+                                    });
+
+                                    // Log the initial selected color and size when the page loads
+                                    console.log('Initial Selected Color:', $('#colorDropdown').val());
+                                    console.log('Initial Selected Size:', $('#sizeDropdown').val());
+                                });
+                            </script>
+
+                            <hr>
+                            <!-- Display "Out of Stock" message if the selected variation has quantity 0 -->
+                           <!-- Display "Out of Stock" message if the selected variation has quantity less than 1 -->
+{% if single_product.variations.quantity < 1 %}
+<h5 class="text-danger">Out of Stock</h5>
+{% else %}
+<button type="submit" class="btn btn-primary">
+    <span class="text">Add to Cart</span>
+    <i class="fa fa-shopping-cart"></i>
+</button>
+{% endif %}
+
+                        </article> <!-- product-info-aside .// -->
+                    </form>
+                </main> <!-- col.// -->
+            </div> <!-- row.// -->
+            {% else %}
+            <div class="alert alert-warning" role="alert">
+                This product is currently unavailable.
+            </div>
+        {% endif %}
+        </div> <!-- card.// -->
+        <!-- ============================ COMPONENT 1 END .// ================================= -->
+        <br>
+        <div class="row">
+            <div class="col-md-9">
+                <!-- Rest of your code... -->
+            </div> <!-- col.// -->
+        </div> <!-- row.// -->
+    </div> <!-- container .//  -->
+</section>
+
+{% endblock %}

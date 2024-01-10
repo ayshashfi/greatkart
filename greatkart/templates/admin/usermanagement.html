@@ -1,0 +1,122 @@
+{%extends 'admin/admin_base.html'%}
+{%load  static%}
+
+{%block content%}
+
+<section class="content-main">
+    
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">User Management</h2>
+            
+        </div>
+        
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr class='text-uppercase'>
+                            <th scope="col">id</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Username</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Phone</th>
+                            <th scope="col" class="text-end">Action</th>
+                          </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in user_page%}
+                        <tr class="text-uppercase">
+                            <td style="text-align: center;">{{ user.id }}</td>
+                            <td><b>{{ user.first_name }}</td>
+                            <td><b>{{ user.username }}</td>
+                            <td><b>{{ user.email }}</td>
+
+                            <td>
+                            {% if user.is_active %}
+                            <span class="badge rounded-pill alert-success">Active</span>
+                            {% else %}
+                            <span class="badge rounded-pill alert-warning">Deactive</span>
+                            {% endif %}
+                            </td>
+                            <td><b>{{ user.phone_number }}</td>
+                        
+                            <td class="text-end">
+                                {% if user.is_active %}
+                                <a href="#" class="btn btn-md rounded font-sm bg-danger" onclick="openModal('confirmationModal{{ user.id }}', 'Confirmation Block user', 'Block')">Block</a>
+                                {% else %}
+                                <a href="#" class="btn btn-md rounded font-sm" onclick="openModal('confirmationModal{{ user.id }}', 'Confirmation Unblock user', 'Unblock')">Unblock</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                            {% endfor %}
+                            
+                            
+                            
+                       
+                    </tbody>
+                </table>
+                {% for user in users %}
+                <div id="confirmationModal{{ user.id }}" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                           
+                            <h4>Confirmation Block user</h4>
+                        </div>
+                        <div class="modal-body">
+                            <h6 style="color: red">Are you sure Block this user?</h6>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('confirmationModal{{ user.id }}')">Cancel</button>
+                            <a href="{% url 'blockuser' user.id %}">
+                                <button type="button" class="btn btn-primary">Confirm</button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                <script>
+                    // Function to open the modal
+                    function openModal(modalId, modalTitle, buttonLabel) {
+                        var modal = document.getElementById(modalId);
+                        var modalHeader = modal.querySelector(".modal-header");
+                        var modalBody = modal.querySelector(".modal-body");
+                        modalHeader.querySelector("h4").textContent = modalTitle;
+                        modalBody.querySelector("h6").textContent = `Are you sure ${buttonLabel} this user?`;
+                        
+                        modal.style.display = 'block';
+                    }
+                
+                    // Function to close the modal
+                    function closeModal(modalId) {
+                        var modal = document.getElementById(modalId);
+                        modal.style.display = 'none';
+                    }
+                </script>
+            </div>
+            <!-- table-responsive//end -->
+        </div>
+        <!-- card-body end// -->
+    </div>
+    <div class="pagination-area mt-30 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                {%for i in page_nums%}
+                <li class="page-item active"><a class="page-link" href="?page={{forloop.counter}}">{{forloop.counter}}</a></li>
+                {%endfor%}
+                
+                <li class="page-item active">
+                    <a class="page-link " href="?page={{user_page.paginator.num_pages}}"><i class="material-icons md-chevron_right"></i></a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    
+</section>
+{%endblock content%}
+           
+            

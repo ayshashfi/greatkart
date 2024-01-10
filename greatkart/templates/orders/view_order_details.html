@@ -1,0 +1,52 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- order_details.html -->
+<div class="container mt-4">
+    <h2 class="mb-4">Order Details - {{ order.order_number }}</h2>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="card-title">Customer Information</h5>
+                    <p class="card-text"><strong class="fw-bold">Name:</strong> {{ order.first_name }} {{ order.last_name }}</p>
+                    <p class="card-text"><strong class="fw-bold">Email:</strong> {{ order.email }}</p>
+                    <p class="card-text"><strong class="fw-bold">Phone:</strong> {{ order.phone }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="card-title">Shipping Address</h5>
+                    <p class="card-text"><strong class="fw-bold">Address Line 1:</strong> {{ order.address_line_1 }}</p>
+                    <p class="card-text"><strong class="fw-bold">Address Line 2:</strong> {{ order.address_line_2 }}</p>
+                    <p class="card-text"><strong class="fw-bold">Country:</strong> {{ order.country }}</p>
+                    <p class="card-text"><strong class="fw-bold">State:</strong> {{ order.state }}</p>
+                    <p class="card-text"><strong class="fw-bold">City:</strong> {{ order.city }}</p>
+                </div>
+            </div>
+            <div class="row">
+            <div class="col-md-6">
+            <h5 class="card-title mt-4">Order Details</h5>
+            <p class="card-text"><strong class="fw-bold">Order Note:</strong> {{ order.order_note }}</p>
+            <p class="card-text"><strong class="fw-bold">Total:</strong> ₹{{ order.order_total }}</p>
+            <p class="card-text"><strong class="fw-bold">Tax:</strong> ₹{{ order.tax }}</p>
+            <p class="card-text"><strong class="fw-bold">Status:</strong> {{ order.status }}</p>
+            <p class="card-text"><strong class="fw-bold">Order Date:</strong> {{ order.created_at }}</p>
+            <!-- Add more fields as needed -->
+            </div>
+            <div class="col-md-6">
+            <h5 class="card-title mt-4">Product Information</h5>
+            {% for item in order.orderproduct_set.all %}
+                <p class="card-text"><strong class="fw-bold">Product:</strong> {{ item.product.product_name }}</p>
+                <p class="card-text"><strong class="fw-bold">Quantity:</strong> {{ item.quantity }}</p>
+                <p class="card-text"><strong class="fw-bold">Price per unit:</strong> ₹{{ item.product_price }}</p>
+                <!-- Add more fields as needed -->
+               
+            {% endfor %}
+            </div>
+            </div>
+            <hr>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,297 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+{% load mathfilters %}
+
+{% block content %}
+<style>
+  .color-indicators {
+    display: flex;
+    align-items: center;
+  }
+
+  .indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 10px;
+  }
+
+  .circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-bottom: 5px;
+  }
+
+  .success .circle {
+    background-color: green;
+  }
+
+  .warning .circle {
+    background-color: yellow;
+  }
+
+  .danger .circle {
+    background-color: red;
+  }
+</style>
+<br>
+<section>
+  <div class='container'>
+    <h3>  Admin Dashboard</h3><br>
+
+    <div class="container-fluid">
+      <!--  Row 1 -->
+      <div class="row">
+        <div class="col-lg-8 d-flex align-items-strech">
+          <div class="card w-100">
+            <div class="card-body">
+              <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                <div>
+                  <div class="d-lg-flex">
+                    <p id="current-date-time" class="text-dark font-weight-bold mb-0"></p>
+                  </div>
+                </div>
+                <div>
+                  <!-- Filter dropdown -->
+                  <label for="timeFilter" class="form-label">Select Time Interval:</label>
+                  <select id="timeFilter" class="form-select" onchange="updateChart()">
+                    <option value="yearly">Yearly</option>
+                    <option value="monthly">Monthly</option>
+                    <!-- Add more options for different intervals if needed -->
+                  </select>
+                </div>
+              </div>
+              <div id="order-chart-container">
+                <!-- Add your chart rendering logic here -->
+                <canvas id="order-chart"></canvas>
+            </div>
+             
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+      <div class="row">
+        <div class="col-lg-12">
+          
+        </div>
+        <div class="col-lg-12">
+          <!-- Monthly Earnings -->
+          <div class="card">
+            <div class="card-body">
+              <div class="row alig n-items-start">
+                <div class="col-8">
+                  <h5 class="card-title mb-9 fw-semibold"> TOTAL SALE </h5>
+                  <h4 class="fw-semibold mb-3">₹{{total_sales_rounded}}</h4>
+                  <!-- <div class="d-flex align-items-center pb-1">
+                    <span
+                      class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
+                      <i class="ti ti-arrow-down-right text-danger"></i>
+                    </span>
+                    <p class="text-dark me-1 fs-3 mb-0"></p>
+                    <p class="fs-3 mb-0"></p>
+                  </div> -->
+                </div>
+                <div class="col-4">
+                  <div class="d-flex justify-content-end">
+                    <div
+                      class="text-white bg-secondary rounded-circle p-6 d-flex align-items-center justify-content-center">
+                      <i class="ti ti-currency-dollar fs-6"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="earning"></div>
+          </div>
+        </div>
+        <div class="col-lg-12">
+          <!-- Monthly Earnings -->
+          <div class="card">
+            <div class="card-body">
+              <div class="row alig n-items-start">
+                <div class="col-8">
+                  <h5 class="card-title mb-9 fw-semibold"> TOTAL EARNINGS </h5>
+                  <h4 class="fw-semibold mb-3">₹{{totalearnings}}</h4>
+                  <!-- <div class="d-flex align-items-center pb-1">
+                    <span
+                      class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
+                      <i class="ti ti-arrow-down-right text-danger"></i>
+                    </span>
+                    <p class="text-dark me-1 fs-3 mb-0"></p>
+                    <p class="fs-3 mb-0"></p>
+                  </div> -->
+                </div>
+                <div class="col-4">
+                  <div class="d-flex justify-content-end">
+                    <div
+                      class="text-white bg-secondary rounded-circle p-6 d-flex align-items-center justify-content-center">
+                      <i class="ti ti-currency-dollar fs-6"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="earnings"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="row alig n-items-start">
+          <div class="col-8">
+            <h5 class="card-title mb-9 fw-semibold">DELIVERED COUNT: {{delivery_count}}</h5>
+            
+            <h5 class="card-title mb-9 fw-semibold">CANCELLED COUNT: {{cancel_count}}</h5>
+            
+            <h5 class="card-title mb-9 fw-semibold">PENDING COUNT: {{pending_count}} </h5>
+            
+           
+           <h3 class="fw-semibold mb-3 text-primary">TOTAL COUNT:{{ delivery_count|add:cancel_count|add:pending_count }}</h3>
+            
+          </div>
+          <div class="col-4">
+            <div class="d-flex justify-content-end">
+              <div
+                class="text-white bg-secondary rounded-circle p-6 d-flex align-items-center justify-content-center">
+                <i class="ti ti-currency-dollar fs-6"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="earnings"></div>
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-lg-8 d-flex align-items-stretch">
+        <div class="card w-100">
+            <div class="card-body p-4">
+                <h5 class="card-title fw-semibold mb-4">Recent Transactions</h5>
+                <div class="table-responsive">
+                    <table class="table text-nowrap mb-0 align-middle table-bordered">
+                        <thead class="text-dark fs-4">
+                            <tr>
+                                <th class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0">Order Id</h6>
+                                </th>
+                                <th class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0">Name</h6>
+                                </th>
+                                <th class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0">Total Price</h6>
+                                </th>
+                                <th class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0">Status</h6>
+                                </th>
+                                <th class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0">Tracking Number</h6>
+                                </th>
+                                <th class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0">Payment Mode</h6>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i in orders %}
+                            <tr>
+                                <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{i.id}}</h6></td>
+                                <td class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-1">{{i.user.first_name}}</h6>
+                                    <span class="fw-normal"></span>
+                                </td>
+                                <td class="border-bottom-0">
+                                    <p class="mb-0 fw-normal">{{i.order_total}}</p>
+                                </td>
+                                <td class="border-bottom-0">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="">{{i.status}}</span>
+                                    </div>
+                                </td>
+                                <td class="border-bottom-0">
+                                    <h4 class="fw-semibold mb-0">{{i.order_number}}</h4>
+                                </td>
+                                <td class="border-bottom-0">
+                                    {% if i.payment.payment_id %}
+                                    <span class="badge bg-success">PayPal</span>
+                                    {% else %}
+                                    <span class="badge bg-warning">Cash On Delivery</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+</div>
+</section>
+<!-- Your existing HTML and CSS code -->
+
+<!-- Your existing HTML and CSS code -->
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    let myChart; // Variable to store the chart instance
+
+    function updateChart() {
+        const selectedOption = $('#timeFilter').val();
+
+        $.ajax({
+            url: "{% url 'get_chart_data' %}",
+            method: "GET",
+            data: { option: selectedOption },
+            success: function (data) {
+                if (myChart) {
+                    // Destroy the existing chart instance if it exists
+                    myChart.destroy();
+                }
+
+                renderChart(data);
+            },
+            error: function (error) {
+                console.error("Error fetching data:", error);
+            },
+        });
+    }
+
+    function renderChart(chartData) {
+        const ctx = document.getElementById("order-chart").getContext("2d");
+
+        // Assuming chartData structure is similar to the one in the previous examples
+        myChart = new Chart(ctx, {
+            type: 'bar',
+            data: chartData,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    // Initial chart rendering (you might want to call this on page load)
+    updateChart();
+</script>
+
+
+
+{% endblock content %}
+
+
+
+
+
+
+
