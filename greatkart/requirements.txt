@@ -11,6 +11,7 @@ colorama==0.4.3
 cssselect2==0.7.0
 Django==5.0
 django-admin-thumbnails==0.2.8
+django-cors-headers==4.3.1
 django-mathfilters==1.0.0
 django-session-timeout==0.1.0
 django-wkhtmltopdf==3.4.0

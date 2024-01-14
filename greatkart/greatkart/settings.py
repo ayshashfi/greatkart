@@ -28,9 +28,10 @@ SECRET_KEY = "django-insecure-#2xai%dc5&#d$n0pmwd1_mbwgtlrc_t_b%mq1s)5e4%m*r94+v
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True #True
+ALLOWED_HOSTS = ['3.91.26.5','0.0.0.0','localhost']
 
-ALLOWED_HOSTS = []
-
+CORS_ALLOWED_ORIGINS = [ "http://3.91.26.5" ]
+CSRF_TRUSTED_ORIGINS = ["http://3.91.26.5"]
 
 # Application definition
 
@@ -53,15 +54,17 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
+     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     'django_session_timeout.middleware.SessionTimeoutMiddleware',
     "django.middleware.common.CommonMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     'whitenoise.middleware.WhiteNoiseMiddleware',
+
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
