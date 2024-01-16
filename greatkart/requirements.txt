@@ -47,4 +47,4 @@ webencodings==0.5.1
 whitenoise==6.6.0
 zopfli==0.2.3
 pypiwin32==223
-pywin32
+pywin32==306
