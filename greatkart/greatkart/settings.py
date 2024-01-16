@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
-from decouple import config
+# from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,10 +28,10 @@ SECRET_KEY = "django-insecure-#2xai%dc5&#d$n0pmwd1_mbwgtlrc_t_b%mq1s)5e4%m*r94+v
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True #True
-ALLOWED_HOSTS = ['3.91.26.5','0.0.0.0','localhost']
+ALLOWED_HOSTS = ['54.160.229.114','0.0.0.0','localhost']
 
-CORS_ALLOWED_ORIGINS = [ "http://3.91.26.5" ]
-CSRF_TRUSTED_ORIGINS = ["http://3.91.26.5"]
+CORS_ALLOWED_ORIGINS = [ "http://54.160.229.114" ]
+CSRF_TRUSTED_ORIGINS = ["http://54.160.229.114"]
 
 # Application definition
 
