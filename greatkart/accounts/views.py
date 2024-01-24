@@ -155,16 +155,34 @@ def activate(request,uidb64,token):
     
      
     
-@login_required(login_url='login')
+
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+
+
+@login_required
 def dashboard(request):
-    orders=Order.objects.order_by('-created_at').filter(user_id=request.user.id,is_ordered=True)
-    orders_count=orders.count()
-    userprofile=UserProfile.objects.get(user_id=request.user.id)
-    context={
-         'orders_count':orders_count,
-         'userprofile':userprofile,
+    orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
+    orders_count = orders.count()
+
+    # Check if the user is a superadmin
+    if request.user.is_superadmin:
+        # If the user is a superuser, create or get their profile
+        userprofile, created = UserProfile.objects.get_or_create(
+            user_id=request.user.id,
+            defaults={'address_line_1': 'Default Address'}
+        )
+    else:
+        # If the user is a regular user, get their profile using get_object_or_404
+        userprofile = get_object_or_404(UserProfile, user_id=request.user.id)
+
+    context = {
+        'orders_count': orders_count,
+        'userprofile': userprofile,
     }
-    return render (request, 'accounts/dashboard.html',context)     
+    return render(request, 'accounts/dashboard.html', context)
+
+   
 
 
 
@@ -383,6 +401,26 @@ def save_edited_address(request):
         return JsonResponse({'success': True})
     else:
         return JsonResponse({'error': 'Invalid request method'})
+
+
+# views.py
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.shortcuts import get_object_or_404
+from .models import Address
+
+@require_POST
+def delete_address(request):
+    # Assuming you have a model named Address with an 'id' field
+    address_id = request.POST.get('address_id')
+    
+    # Retrieve the address object
+    address = get_object_or_404(Address, id=address_id)
+    
+    # Delete the address
+    address.delete()
+    
+    return JsonResponse({'message': 'Address deleted successfully'})
 
 
 

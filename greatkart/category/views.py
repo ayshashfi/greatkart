@@ -5,6 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from .models import category
 from django.http import Http404
+from datetime import datetime, date           
+from orders.models import Notification  
 
 
 @login_required(login_url='admin_login')
@@ -16,8 +18,10 @@ def categories(request):
     page=request.GET.get('page')
     product_page=p.get_page(page)
     page_nums='a'*product_page.paginator.num_pages
+    notifications = Notification.objects.all().order_by('-timestamp')[:5]
+    today_notifications = [notification for notification in notifications if notification.timestamp.date() == date.today()]
     return render(request, 'category/category.html', {'categories': categories,'product_page':product_page,
-        'page_nums':page_nums})
+        'page_nums':page_nums,'notifications':notifications,'today_notifications':today_notifications})
 
 
 @login_required(login_url='admin_login')

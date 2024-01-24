@@ -161,7 +161,29 @@
             }
         });
     }
-    
+    function deleteAddress(addressId) {
+      console.log('Deleting address:', addressId);
+  
+      $.ajax({
+          url: '{% url "delete_address" %}',  // Replace with the actual URL you defined in urls.py
+          method: 'POST',
+          data: {
+              address_id: addressId,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+          },
+          dataType: 'json',
+          success: function(data) {
+              console.log('Address deleted successfully:', data);
+              // Remove the corresponding address card from the UI or perform other handling
+              $('#address-card-' + addressId).remove();
+          },
+          error: function(error) {
+              console.log('Error deleting address:', error);
+          }
+      });
+  }
+  
+  
 </script>
 <style>
     .address-container {

@@ -10,8 +10,9 @@ from django.core.mail import EmailMessage
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-
-
+from datetime import datetime, date           
+from orders.models import Notification
+import datetime
 
 @login_required(login_url='admin_login')
 def order_list(request):
@@ -24,8 +25,10 @@ def order_list(request):
     page_number = request.GET.get('page')
     order_page = paginator.get_page(page_number)
     page_nums = range(1, order_page.paginator.num_pages + 1)
+    notifications = Notification.objects.all().order_by('-timestamp')[:5]
+    today_notifications = [notification for notification in notifications if notification.timestamp.date() == date.today()]
     
-    return render(request, 'admin/order.html', {'orders': orders, 'ordered_product':ordered_product,'order_page': order_page, 'page_nums': page_nums})
+    return render(request, 'admin/order.html', {'orders': orders, 'ordered_product':ordered_product,'order_page': order_page, 'page_nums': page_nums,'notifications':notifications,'today_notifications':today_notifications})
 
 
 
@@ -63,18 +66,12 @@ def payments(request):
         orderproduct.product_price = item.product.product_price
         orderproduct.ordered = True
         orderproduct.save()
-
         cart_item = CartItem.objects.get(id=item.id)
         product_variation = cart_item.variations.all()
         orderproduct = OrderProduct.objects.get(id=orderproduct.id)
         orderproduct.variations.set(product_variation)
         orderproduct.save()
-
-
-        # Reduce the quantity of the sold products
-        # product = Product.objects.get(id=item.product_id)
-        # product.stock -= item.quantity
-        # product.save()
+        print("variations:",product_variation)
         for variation in item.variations.all():
             variation.quantity -= item.quantity
             variation.save()

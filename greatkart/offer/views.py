@@ -6,6 +6,8 @@ from datetime import datetime
 from django.utils import timezone
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
+from datetime import datetime, date           
+from orders.models import Notification
 
 @login_required(login_url='admin_login')
 def product_offer(request):
@@ -16,7 +18,9 @@ def product_offer(request):
     page=request.GET.get('page')
     offer_page=p.get_page(page)
     page_nums='a'*offer_page.paginator.num_pages
-    return render(request,'offer/product_offer.html',{'offer':offer, 'page_nums':page_nums,'offer_page':offer_page})
+    notifications = Notification.objects.all().order_by('-timestamp')[:5]
+    today_notifications = [notification for notification in notifications if notification.timestamp.date() == date.today()]
+    return render(request,'offer/product_offer.html',{'offer':offer, 'page_nums':page_nums,'offer_page':offer_page,'notifications':notifications,'today_notifications':today_notifications})
 
 
 @login_required(login_url='admin_login')

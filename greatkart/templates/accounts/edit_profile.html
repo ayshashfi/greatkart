@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{%load static%}
 {%block content%}
 
 <!-- ========================= SECTION CONTENT ========================= -->
@@ -17,7 +17,11 @@
 
             <div class="card-body">
               <div class="text-right">
-                <img src="{{userprofile.profile_picture.url}}" alt="Profile Picture" width="100" style="border-radius:50px;">
+                {% if userprofile.profile_picture %}
+                <img src="{{ userprofile.profile_picture.url }}" width="50" height="50" style="border-radius:50%;">
+            {% else %}
+                <img src="{% static 'images/avatars/avatar1.jpg' %}" width="50" height="50" style="border-radius:50%;">
+            {% endif %}
               </div>
 
                 <div class="row"> 

@@ -34,11 +34,13 @@
                                             <div class="aside"><img src="{{ cart_item.product.images.url }}" class="img-sm"></div>
                                             <figcaption class="info">
                                                 <a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
-                                                <p>Selected Color: {{ cart_item.selected_color }}</p>
-                                                <p>Selected Size: {{ cart_item.selected_size }}</p>
+                                                <p>Color: {{ cart_item.selected_color|capfirst }}</p>
+                                                <p>Size: {{ cart_item.selected_size|upper }}</p>
                                             </figcaption>
                                         </figure>
                                     </td>
+                                    
+                                    
                             
 
         <td>

@@ -128,10 +128,10 @@
                         <li class="dropdown nav-item">
                             <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownLanguage" aria-expanded="false">
                                 <i class="material-icons md-notifications animation-shake"></i>
-                                <span class="badge rounded-pill">3</span>
+                                <span class="badge rounded-pill">{{ today_notifications|length }}</span> Notifications
                             </a>
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownLanguage">
-                                {% for notification in notifications %}
+                                {% for notification in today_notifications %}
                                     <a class="dropdown-item" href="#">
                                         <div class="notification-item">
                                             <div class="notification-content">
@@ -146,10 +146,25 @@
                             </div>
                         </li>
                         
+                        
+                        
 
 
                         <li class="dropdown nav-item">
-                            <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src="{% static 'assets-admin/imgs/people/avatar-2.png' %}" alt="User" /></a>
+                            <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false">
+                                {% if user.is_authenticated %}
+                                    {% if user.userprofile.profile_picture %}
+                                        <img class="img-xs rounded-circle" src="{{ user.userprofile.profile_picture.url }}" alt="User" />
+                                    {% else %}
+                                        <!-- Default image if the user doesn't have a profile picture -->
+                                        <img class="img-xs rounded-circle" src="{% static 'images/avatars/avatar1.jpg' %}" alt="User" />
+                                    {% endif %}
+                                {% else %}
+                                    <!-- Default image for anonymous users -->
+                                    <img class="img-xs rounded-circle" src="{% static 'images/avatars/avatar1.jpg' %}" alt="User" />
+                                {% endif %}
+                            </a>
+                            
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
                                 <a class="dropdown-item" href="{%url 'usermanagement' %}"><i class="material-icons md-perm_identity"></i>Users</a>
                                 <a class="dropdown-item" href="{%url 'admin_dashboard'%}"><i class="material-icons md-account_balance_wallet"></i>Dashboard</a>

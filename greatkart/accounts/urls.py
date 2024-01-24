@@ -20,6 +20,7 @@ urlpatterns = [
     path('my_addresses/',views.my_addresses,name="my_addresses"),
     path('get_address_details/', views.get_address_details, name='get_address_details'),
     path('save_edited_address/', views.save_edited_address, name='save_edited_address'),
+    path('delete_address/', views.delete_address, name='delete_address'),
     path('change_password/',views.change_password,name="change_password"),
     path('order_detail/<int:order_id>/',views.order_detail,name="order_detail"),
     

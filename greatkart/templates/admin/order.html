@@ -10,14 +10,7 @@
             <h2 class="content-title card-title">Order List</h2>
             <p>Order list of users of GreatKart</p>
         </div>
-        <form class="searchform" action="#" method="POST">
-            {% csrf_token %}
-            <div class="input-group">
-                <input list="search_terms" type="text" name='search' class="form-control" placeholder="Search term" />
-                <button class="btn btn-light bg" type="button"><i class="material-icons md-search"></i></button>
-            </div>
-            
-        </form>
+      
     </div>
     <div class="card mb-4">
         {% comment %} <header class="card-header">
@@ -104,6 +97,9 @@
                                       
                                 {% elif order.status == 'Cancelled' %}
                                 <p>Cancelled</p>
+                                
+                                {% elif order.status == 'Completed' %}
+                                <p>Completed</p>
                                 {% else %}
                                 <form method="post" action="{% url 'update_order_status' order.id %}" id="status-form">
                                     {% csrf_token %}

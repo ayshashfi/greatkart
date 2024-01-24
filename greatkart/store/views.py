@@ -40,6 +40,7 @@ def store(request, category_slug=None):
     
     return render(request, 'store/store.html', context)
 
+from django.db.models import F
 
 def product_detail(request, category_slug, product_slug):
     try:
@@ -64,21 +65,27 @@ def product_detail(request, category_slug, product_slug):
 
     # Get the variations with stock status
     variations = Variation.objects.filter(product=single_product).select_related('color', 'size').annotate(
-        in_stock=Case(
-            When(quantity__gt=0, then=Value(True)),
-            default=Value(False),
-            output_field=BooleanField()
-        )
+    in_stock=Case(
+        When(quantity__gt=0, then=Value(True)),
+        default=Value(False),
+        output_field=BooleanField()
+    ),
+    variation_quantity=F('quantity')  # Use a different name for the annotation
     ).distinct()
 
     
     colors = Color.objects.filter(variation__product=single_product, is_available=True).distinct()
     color_variations = []
+
     for color in colors:
+        variations_for_color = Variation.objects.filter(product=single_product, color=color)
         color_variations.append({
-            'color': color,
-            'sizes': color.variation_set.values_list('size__size_range', flat=True).distinct()
-        })
+        'color': color,
+        'sizes': color.variation_set.filter(product=single_product).values_list('size__size_range', flat=True).distinct(),
+        'product_id': single_product.id , # Include the product ID
+        'variations': variations_for_color
+    })
+
 
     # Get the offer related to the product
     product_offer = single_product.offer  # Assuming "offer" is the foreign key in the Product model
@@ -98,7 +105,9 @@ def product_detail(request, category_slug, product_slug):
         'discounted_price': discounted_price,
     }
 
-    print("Variations:", variations)
+    print("Variations:")
+    for variation in variations:
+        print(f"ID: {variation.id}, Color: {variation.color}, Size: {variation.size}, Quantity: {variation.variation_quantity}")
     return render(request, 'store/product_detail.html', context)
 
 
@@ -139,8 +148,8 @@ def submit_review(request, product_id):
                 messages.success(request, 'Thank you! Your review has been submitted.')
                 return redirect(url)
             
-            
-            
+from datetime import datetime, date           
+from orders.models import Notification       
 @login_required(login_url='admin_login')
 def products(request):
     if not request.user.is_superadmin:
@@ -150,13 +159,16 @@ def products(request):
     page=request.GET.get('page')
     product_page=p.get_page(page)
     page_nums='a'*product_page.paginator.num_pages
-
+    notifications = Notification.objects.all().order_by('-timestamp')[:5]
+    today_notifications = [notification for notification in notifications if notification.timestamp.date() == date.today()]
     product_list={
         'product':product,
         'categories':category.objects.filter(is_available=True).order_by('id'),
         'offer': Offer.objects.filter(is_available= True).order_by('id'),
         'product_page':product_page,
         'page_nums':page_nums,
+        'notifications':notifications,
+        'today_notifications':today_notifications,
         
     }
     return render (request,'store/product.html',product_list)
@@ -246,6 +258,7 @@ def product_edit(request, product_id):
 
     if request.method == 'POST':
         name = request.POST['product_name']
+        image = request.FILES.get('image', None)
         price = request.POST['product_price']
         category_id = request.POST.get('category')
         offer_id = request.POST.get('offer')
@@ -277,6 +290,7 @@ def product_edit(request, product_id):
         editproduct.category = category_obj
         editproduct.offer = offer_obj
         editproduct.description = product_description
+        editproduct.images=image
         editproduct.save()
         messages.success(request, 'Product edited successfully!')
         return redirect('products')
@@ -463,7 +477,9 @@ def image_list(request,product_id):
 
 
 
-#  This is image add function         
+from django.shortcuts import render, redirect
+from .forms import ImageForm
+from .models import Product
 
 @login_required(login_url='admin_login')  
 def image_view(request, img_id):
@@ -473,9 +489,23 @@ def image_view(request, img_id):
         var = Product.objects.get(id=img_id)
 
         if form.is_valid():
-            image_instance = form.save(commit=False)  
-            image_instance.product = var  
-            image_instance.save()  
+            # Get crop data from the form
+            crop_x = request.POST.get('crop_x')
+            crop_y = request.POST.get('crop_y')
+            crop_width = request.POST.get('crop_width')
+            crop_height = request.POST.get('crop_height')
+
+            # Create an Image instance without saving it to the database
+            image_instance = form.save(commit=False)
+
+            # Set the product for the image
+            image_instance.product = var
+
+            # Perform cropping based on the provided crop data
+            image_instance.image = crop_and_save_image(image_instance.image, crop_x, crop_y, crop_width, crop_height)
+
+            # Save the Image instance to the database
+            image_instance.save()
 
             print("Image saved successfully!")
             
@@ -486,6 +516,30 @@ def image_view(request, img_id):
     
     context = {'form': form, 'img_id': img_id}
     return render(request, 'variant/image_add.html', context)
+
+from PIL import Image
+from io import BytesIO
+
+def crop_and_save_image(original_image, crop_x, crop_y, crop_width, crop_height):
+    # Open the original image using PIL
+    image = Image.open(original_image)
+
+    # Crop the image based on the provided crop data
+    cropped_image = image.crop((float(crop_x), float(crop_y), float(crop_x) + float(crop_width), float(crop_y) + float(crop_height)))
+
+    # Save the cropped image to a BytesIO buffer
+    buffer = BytesIO()
+    cropped_image.save(buffer, format='PNG')
+
+    # Set the buffer's position to the beginning
+    buffer.seek(0)
+
+    # Update the original image content with the cropped image content
+    original_image.file = buffer
+
+    return original_image
+
+
 
 
 

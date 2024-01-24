@@ -52,6 +52,7 @@ def admin_dashboard(request):
     if not request.user.is_superadmin:
         return redirect('admin_login')
     notifications = Notification.objects.all().order_by('-timestamp')[:5]
+    today_notifications = [notification for notification in notifications if notification.timestamp.date() == date.today()]
 
     # Sales data for the chart
     sales_data = OrderProduct.objects.values('order__created_at__date').annotate(total_sales=Sum('product_price')).order_by('-order__created_at__date')
@@ -104,6 +105,7 @@ def admin_dashboard(request):
         'sales_values': sales_values,
         'return_values': return_values,
         'notifications': notifications,
+        'today_notifications':today_notifications,
     }
 
     return render(request, 'admin/admin_dashboard.html', context)
@@ -121,10 +123,15 @@ def usermanagement(request):
     page=request.GET.get('page')
     user_page=p.get_page(page)
     page_nums='a'*user_page.paginator.num_pages
+    notifications = Notification.objects.all().order_by('-timestamp')[:5]
+    today_notifications = [notification for notification in notifications if notification.timestamp.date() == date.today()]
     context={
         'users':users,
         'user_page':user_page,
-        'page_nums':page_nums
+        'page_nums':page_nums,
+        'notifications':notifications,
+        'today_notifications':today_notifications,
+        
         }
     return render(request,'admin/usermanagement.html',context)
 
@@ -175,6 +182,9 @@ def sales_report(request):
         # Calculate total sales and total orders
         total_sales = round(sum(order.order_total for order in orders), 2)
         total_orders = orders.count()
+        
+        notifications = Notification.objects.all().order_by('-timestamp')[:5]
+        today_notifications = [notification for notification in notifications if notification.timestamp.date() == date.today()]
 
         # Calculate sales by status
         sales_by_status = {
@@ -196,10 +206,12 @@ def sales_report(request):
             'sales_by_status': sales_by_status,
             'recent_orders': recent_orders,
             'orders': orders,
+           
             
         }
 
-        return render(request, 'admin/sales_report.html', {'sales_report': sales_report})
+        return render(request, 'admin/sales_report.html', {'sales_report': sales_report, 'notifications':notifications,
+            'today_notifications':today_notifications,})
 
 
 

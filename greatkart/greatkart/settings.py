@@ -28,15 +28,16 @@ SECRET_KEY = "django-insecure-#2xai%dc5&#d$n0pmwd1_mbwgtlrc_t_b%mq1s)5e4%m*r94+v
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True #True
-ALLOWED_HOSTS = ['https://greatkart.online','54.160.229.114','0.0.0.0','localhost']
+ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ['https://greatkart.online','54.160.229.114','0.0.0.0','localhost']
 
-CSRF_TRUSTED_ORIGINS = ["https://greatkart.online"]
-CSRF_ALLOWED_ORIGINS = ["https://greatkart.online"]
-CORS_ORIGINS_WHITELIST = ["https://greatkart.online"]
+# CSRF_TRUSTED_ORIGINS = ["https://greatkart.online"]
+# CSRF_ALLOWED_ORIGINS = ["https://greatkart.online"]
+# CORS_ORIGINS_WHITELIST = ["https://greatkart.online"]
 
-CSRF_COOKIE_SECURE=False
+# CSRF_COOKIE_SECURE=False
 
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 # Application definition

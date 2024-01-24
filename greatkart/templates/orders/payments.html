@@ -58,11 +58,8 @@
 											<figcaption class="info">
 												<a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
 												<p class="text-muted small">
-													{% if cart_item.variations.all %}
-													{% for item in cart_item.variations.all %}
-													{{ item.variation_category | capfirst }} : {{ item.variation_value | capfirst }} <br>
-													{% endfor %}
-													{% endif %}
+													<p>Color: {{ cart_item.selected_color|capfirst }}</p>
+													<p>Size: {{ cart_item.selected_size|upper }}</p>
 												</p>
 											</figcaption>
 										</figure>
@@ -114,13 +111,35 @@
 							<!-- PayPal Button Will Load -->
 						</div>
 						
+						<style>
+							.responsive-button {
+								padding: 10px 20px;
+								background-color: #4CAF50;
+								color: white;
+								border: none;
+								border-radius: 5px;
+								cursor: pointer;
+								box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+								width: 350px;
+								max-width: 100%; /* Make sure the button doesn't exceed the container width */
+								margin: 0 auto; /* Center the button within its container */
+							}
+						
+							@media (max-width: 600px) {
+								.responsive-button {
+									width: 100%; /* Adjust width for smaller screens */
+								}
+							}
+						</style>
+						
 						<div style="text-align: center; margin-top: 20px 5px;">
 							<a href="{% url 'cod' order.id %}" style="text-decoration: none;">
-								<button style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);width:350px;">
+								<button class="responsive-button">
 									Cash On Delivery
 								</button>
 							</a>
 						</div>
+						
 						
 					</div> <!-- card-body.// -->
 				</div> <!-- card.// -->
