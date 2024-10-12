@@ -1,0 +1,180 @@
+{%extends 'admin/admin_base.html'%}
+{% load static%}
+
+{% block content %}
+
+    
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Order List</h2>
+            <p>Order list of users of GreatKart</p>
+        </div>
+      
+    </div>
+    <div class="card mb-4">
+        {% comment %} <header class="card-header">
+            <div class="row gx-3">
+                <div class="col-lg-4 col-md-6 me-auto">
+                    <form action="{% url 'order_search' %}" method="POST">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" placeholder="Search..." name="search" class="form-control" />
+                            <button type="submit" class="btn btn-primary"><i class="ti ti-search"></i></button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-lg-2 col-6 col-md-3">
+                    <form id="user-status-formm" method="post" action="{% url 'order_payment_sort' %}">
+                      {% csrf_token %}
+                      <div class="col-lg-2 col-6 col-md-3">
+                          <select class="form-select" name="name" id="status-selectt" style="width: 100px;">
+                              <option value="">Sort</option>
+                              <option value="cod">cod</option>
+                              <option value="razorpay">razorpay</option>
+                              <option value="All">All</option>
+                          </select>
+                      </div>
+                      <input type="hidden" name="auto_submit" value="true">
+                  </form>
+                </div>
+             
+                <div class="col-lg-2 col-6 col-md-3">
+                    <form id="user-status-form" method="post" action="{% url 'order_status_show' %}">
+                      {% csrf_token %}
+                      <div class="col-lg-2 col-6 col-md-3">
+                          <select class="form-select" name="name" id="status-select" style="width: 130px;">
+                              <option value="">Status</option>
+                              <option value="Pending">Pending</option>
+                              <option value="Processing">Processing</option>
+                              <option value="Shipped">Shipped</option>
+                              <option value="Delivered">Delivered</option>
+                              <option value="Cancelled">Cancelled</option>
+                              <option value="Return">Return</option>
+                              <option value="All">All</option>
+                          </select>
+                      </div>
+                      <input type="hidden" name="auto_submit" value="true">
+                  </form>
+                </div>
+            </div>
+        </header> {% endcomment %}
+        
+        <!-- card-header end// -->
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            
+                            <th>#ID</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Phone</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Payment Method</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Order date</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                      
+                        {% for order in order_page %}
+                        <tr>
+                            
+                            <td>{{ order.order_number }}</td>
+                            <td><b>{{ order.user.first_name }}</b></td>
+                            <td>{{ order.user.phone_number }}</td>
+                            <td>₹{{ order.order_total }}</td>
+                            {% if order.payment.payment_id %}
+                            <td>PayPal</td>
+                            {% else %}
+                            <td>Cash On Delivery</td>
+                            {% endif %}
+                            <td id="statusCell">
+                                {% if order.status == 'Returned' %}
+                                        <p>Returned</p>
+                                      
+                                {% elif order.status == 'Cancelled' %}
+                                <p>Cancelled</p>
+                                
+                                {% elif order.status == 'Completed' %}
+                                <p>Completed</p>
+                                {% else %}
+                                <form method="post" action="{% url 'update_order_status' order.id %}" id="status-form">
+                                    {% csrf_token %}
+                                    <select name="status" id="status-select" class="form-select">
+                                        <option value="New" {% if order.status == 'New' %} selected {% endif %}>New</option>
+                                        <option value="Accepted" {% if order.status == 'Accepted' %} selected {% endif %}>Accepted</option>
+                                        <option value="Completed" {% if order.status == 'Completed' %} selected {% endif %}>Completed</option>
+                                        <option value="Cancelled" {% if order.status == 'Cancelled' %} selected {% endif %}>Cancelled</option>
+                                        
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-primary mt-1">Update</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                            <td>{{ order.created_at }}</td>
+                           
+                                {% if order.order_number %}
+                                <td>
+                                <a href="{% url 'view_order_details' order_number=order.order_number %}" class="btn btn-sm btn-primary">View Details</a>
+                            </td>
+                                {% endif %}
+                            
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+            </div>
+            <!-- table-responsive //end -->
+        </div>
+        <!-- card-body end// -->
+    </div>
+    <!-- card end// -->
+    <div class="pagination-area mt-30 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                {%for i in page_nums%}
+                <li class="page-item active"><a class="page-link" href="?page={{forloop.counter}}">{{forloop.counter}}</a></li>
+                {%endfor%}
+                
+                <li class="page-item active">
+                    <a class="page-link " href="?page={{order_page.paginator.num_pages}}"><i class="material-icons md-chevron_right"></i></a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    
+</section>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const statusSelect = document.getElementById('status-select');
+        
+        statusSelect.addEventListener('change', function () {
+            document.getElementById('user-status-form').submit();
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const statusSelect = document.getElementById('status-selectt');
+        
+        statusSelect.addEventListener('change', function () {
+            document.getElementById('user-status-formm').submit();
+        });
+    });
+</script>
+   
+
+<script src="{% static 'assets/js/vendors/jquery-3.6.0.min.js' %}"></script>
+<script src="{% static 'assets/js/vendors/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'assets/js/vendors/select2.min.js' %}"></script>
+<script src="{% static 'assets/js/vendors/perfect-scrollbar.js' %}"></script>
+<script src="{% static 'assets/js/vendors/jquery.fullscreen.min.js' %}"></script>
+<!-- Main Script -->
+<script src="{% static 'assets/js/main.js?v=1.1' %}" type="text/javascript"></script>
+
+{% endblock content %}
+

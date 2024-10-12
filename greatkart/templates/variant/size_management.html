@@ -1,0 +1,190 @@
+{%extends 'admin/admin_base.html'%}
+{load static}
+
+
+{% block content%}
+<section class="content-main">
+    <div class="content-header">
+        
+        <h2>Size Management</h2>
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row gx-3">
+                <div class="col-lg-2 col-6 col-md-3">
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#addCategory">
+                        <button type="submit" class="btn btn-primary"><i class="ti ti-plus"></i> Add Size</button>
+
+                    </a>
+                </div>
+                
+            </div>
+        </header>
+        <!-- card-header end// -->
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr class="text-uppercase">
+                            <th scope="col">id</th>
+                            <th scope="col">Size</th>
+                            <th scope="col">Action</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in size_page %}
+                        <tr class="text-uppercase">
+                            <td> {{c.id}} </td>
+                           
+                            <td> {{c.size_range}} </td>
+            
+                            <td>
+                                <!-- Button trigger modal -->
+                                <a href="#" class="btn btn-md rounded font-sm" onclick="openEditModal('{{ c.id }}', '{{ c.size_range }}')">Edit</a>
+                                
+                                {% if c.is_available %}
+                             <!-- Delete action -->
+                             <a href="#" class="btn btn-md rounded font-sm bg-danger" onclick="openModal('confirmationModal{{ c.id }}', 'Confirmation Delete item', 'delete')">Unlist</a>
+                         {% else %}
+                             <!-- Add action -->
+                             <a href="#" class="btn btn-md rounded font-sm" onclick="openModal('confirmationModal{{ c.id }}', 'Confirmation Add item', 'add')">List</a>
+                         {% endif %}
+                            </td>
+            
+                        
+
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+            <!-- table-responsive//end -->
+        </div>
+        <!-- card-body end// -->
+    </div>
+    <div class="pagination-area mt-30 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                {%for i in page_nums%}
+                <li class="page-item active"><a class="page-link" href="?page={{forloop.counter}}">{{forloop.counter}}</a></li>
+                {%endfor%}
+                
+                <li class="page-item active">
+                    <a class="page-link " href="?page={{size_page.paginator.num_pages}}"><i class="material-icons md-chevron_right"></i></a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    
+</section>
+
+<div class="modal fade" id="addCategory" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Add Size</h1>
+                <br>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <form action="{% url 'add_size' %}" enctype="multipart/form-data" method="POST">
+                    {% csrf_token %}
+                    <div style="width: 100px;" class="">
+                    </div>
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Size</label>
+                        <input name='size'  type="text" id="form3Example3cg"
+                            class="form-control form-control-lg" />
+                    </div>
+
+                    <div class="d-flex justify-content-center">
+                        <button type="submit" class="btn btn-primary btn-lg gradient-custom-4 w-50 text-light"
+                            type="submit">Save </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% for c in size_page %}
+<div id="confirmationModal{{ c.id }}" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+           
+            <h4>Confirmation Block user</h4>
+        </div>
+        <div class="modal-body">
+            <h6 style="color: red">Are you sure Block this user?</h6>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('confirmationModal{{ c.id}}')">Cancel</button>
+            <a href="{% url 'size_delete' c.id %}">
+                <button type="button" class="btn btn-primary">Confirm</button>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Size Modal -->
+<div id="editModal{{ c.id }}" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4>Edit Size</h4>
+        </div>
+        <div class="modal-body">
+            <form action="{% url 'edit_size' c.id %}" method="POST">
+                {% csrf_token %}
+                <div class="form-outline mb-4">
+                    <label class="form-label" for="editSize{{ c.id }}">Size</label>
+                    <input name="size" type="text" id="editSize{{ c.id }}" class="form-control form-control-lg" value="{{ c.size_range }}" />
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-lg gradient-custom-4 text-light">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // Function to open the modal
+    function openModal(modalId, modalTitle, buttonLabel) {
+        var modal = document.getElementById(modalId);
+        var modalHeader = modal.querySelector(".modal-header");
+        var modalBody = modal.querySelector(".modal-body");
+        modalHeader.querySelector("h4").textContent = modalTitle;
+        modalBody.querySelector("h6").textContent = `Are you sure ${buttonLabel} this item?`;
+        
+        modal.style.display = 'block';
+    }
+
+    // Function to close the modal
+    function closeModal(modalId) {
+        var modal = document.getElementById(modalId);
+        modal.style.display = 'none';
+    }
+</script>
+<script>
+    // Function to open the edit modal
+    function openEditModal(sizeId, currentSize) {
+        var editModal = document.getElementById('editModal' + sizeId);
+        var editSizeInput = editModal.querySelector("#editSize" + sizeId);
+
+        // Set the current size value in the edit modal
+        editSizeInput.value = currentSize;
+
+        // Display the edit modal
+        editModal.style.display = 'block';
+    }
+</script>
+
+
+
+{% endfor %}
+{%endblock content%}

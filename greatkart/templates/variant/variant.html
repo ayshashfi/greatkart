@@ -1,0 +1,284 @@
+{% extends 'admin/admin_base.html' %}
+{load static}
+
+
+{% block content%}
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Variants</h2>
+           
+        </div>
+        <div class="col-lg-2 col-6 col-md-3">
+            <a href="{% url 'add_Product_Variant'%}" data-bs-toggle="modal" data-bs-target="#addCategory">
+                <button type="submit" class="btn btn-primary"><i class="ti ti-plus"></i> Add variant</button>
+
+            </a>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row gx-3">
+                <div class="col-lg-4 col-md-6 me-auto">
+                    <div class="input-group">
+                        <div class="form-outline">
+                            <form action="{% url 'variant_search' %}" method="POST">
+                            {% csrf_token %}
+                                <div>
+
+                                    <input type="search" placeholder="Search..." id="form1" name="search" class="form-control" />
+                                    
+                                    <button type="submit" class="btn btn-primary" style="postion:absolute; left:190px;bottom:40px; height:40px;">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            </form>
+                      </div>
+                </div>
+                
+            </div>
+        </header>
+        <!-- card-header end// -->
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr class="text-uppercase">
+                            <th scope="col">Id</th>
+                            <th scope="col">Product</th>
+                            <th scope="col">Color</th>
+                            <th scope="col">Size</th>
+                            <th scope="col">Quantity</th>
+                            <th scope="col"></th>
+                            <th scope="col">Action</th>
+                         
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in variant_list.variant_page %}
+                        <tr class="text-uppercase">
+                            <td><b>{{ c.id }}</b></td>
+                            <td><b>{{ c.product.product_name }}</b></td>
+                            <td><b>{{ c.color.color_name }}</b></td>
+                            <td><b>{{ c.size.size_range }}</b></td>
+                            <td><b>{{ c.quantity }}</b></td>
+                            <!-- <td><b>View</b></td> -->
+                            <td><b>{{ Action }}</b></td>
+                            <td>
+                                <!-- Button trigger modal -->
+                                <button type="button" class="btn btn spacer c"
+                                    style="background-color: rgb(246, 250, 10); color:rgb(102, 94, 94)"
+                                    data-bs-toggle="modal" data-bs-target="#confirmEdit{{forloop.counter}}"><i
+                                        class="ti ti-edit"></i>
+                                    EDIT
+                                </button>
+                               {% if c.is_available %}
+                               <!-- Delete action -->
+                               <a href="#" class="btn btn-md rounded font-sm bg-danger" onclick="openModal('confirmationModal{{ c.id }}', 'Confirmation Delete item', 'delete')">Unlist</a>
+                           {% else %}
+                               <!-- Add action -->
+                               <a href="#" class="btn btn-md rounded font-sm" onclick="openModal('confirmationModal{{ c.id }}', 'Confirmation Add item', 'add')">List</a>
+                           {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- table-responsive//end -->
+        </div>
+        <!-- card-body end// -->
+    </div>
+    <div class="pagination-area mt-30 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                {%for i in variant_list.page_nums%}
+                <li class="page-item active"><a class="page-link" href="?page={{forloop.counter}}">{{forloop.counter}}</a></li>
+                {%endfor%}
+                
+                <li class="page-item active">
+                    <a class="page-link " href="?page={{variant_list.variant_page.paginator.num_pages}}"><i class="material-icons md-chevron_right"></i></a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</section>
+<div class="modal fade" id="addCategory" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Add Product</h1>
+                <br>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <form action="{% url 'add_Product_Variant' %}" enctype="multipart/form-data" method="POST">
+                    {% csrf_token %}
+                    <div style="width: 100px;" class=""></div>
+                
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Variant Name</label>
+                        <select class="form-select" name="variant_name">
+                            {% for c in variant_list.product %}
+                            <option value="{{ c.id }}">{{ c.product_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Size</label>
+                        <select class="form-select" name="variant_size">
+                            {% for c in variant_list.size_range %}
+                                {% if c.is_available %}
+                                    <option value="{{ c.id }}">{{ c.size_range }}</option>
+                                {% endif %}
+                            {% endfor %}
+                            {% if not c.is_available%}
+                                    <option value="">Add size</option>
+                                {% endif %}
+                            
+                            
+                        </select>
+                    </div>
+                
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Color</label>
+                        <select class="form-select" name="variant_color">
+                            {% for c in variant_list.color_name %}
+                            <option value="{{ c.id }}">{{ c.color_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Quantity</label>
+                        <input name="variant_quantity" value="" type="text" id="form3Example3cg" class="form-control form-control-lg" />
+                    </div>
+                
+                    <div class="d-flex justify-content-center">
+                        <button type="submit" class="btn btn-primary" type="submit">Save </button>
+                    </div>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+</div>
+{% for c in variant_list.variant_page %}
+<div class="modal fade" id="confirmEdit{{forloop.counter}}" tabindex="-1"
+aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title fs-5" id="exampleModalLabel">Edit Variant</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'edit_productvariant' c.id %}"
+                    enctype="multipart/form-data" method="POST">
+                    {% csrf_token %}
+                    <div style="width: 100px;" class="">
+                    </div>
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Variant
+                            Name</label>
+                        <select class="form-select" name="variant_name">
+                            <option value="{{ c.product.id }}">{{ c.product.product_name }}</option>
+                            {% for product in variant_list.product %}
+                            {% if product.id != c.product.id %}
+                            <option value="{{ product.id }}">{{ product.product_name }}
+                            </option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Size</label>
+                        <select class="form-select" name="variant_size">
+                            <option value="{{ c.size.id }}">{{ c.size.size_range }}
+                            </option>
+                            {% for size in variant_list.size_range %}
+                            {% if size.id != c.size.id %}
+                            <option value="{{ size.id }}">{{ size.size_range }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Color</label>
+                        <select class="form-select" name="variant_color">
+                            <option value="{{ c.color.id }}">{{ c.color.color_name }}
+                            </option>
+                            {% for color in variant_list.color_name %}
+                            {% if color.id != c.color.id %}
+                            <option value="{{ color.id }}">{{ color.color_name }}
+                            </option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Quantity</label>
+                        <input name="variant_quantity" value="{{ c.quantity }}"
+                            type="text" id="form3Example3cg"
+                            class="form-control form-control-lg" />
+                    </div>
+
+
+                    <div class="d-flex justify-content-center">
+                        <button type="submit"
+                            class="btn btn-danger btn-lg gradient-custom-4 w-50 text-light"
+                            type="submit">Save </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="confirmationModal{{ c.id }}" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+           
+            <h4>Confirmation Block user</h4>
+        </div>
+        <div class="modal-body">
+            <h6 style="color: red">Are you sure Block this user?</h6>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('confirmationModal{{ c.id}}')">Cancel</button>
+            <a href="{% url 'productvariant_delete' c.id %}">
+                <button type="button" class="btn btn-primary">Confirm</button>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to open the modal
+    function openModal(modalId, modalTitle, buttonLabel) {
+        var modal = document.getElementById(modalId);
+        var modalHeader = modal.querySelector(".modal-header");
+        var modalBody = modal.querySelector(".modal-body");
+        modalHeader.querySelector("h4").textContent = modalTitle;
+        modalBody.querySelector("h6").textContent = `Are you sure ${buttonLabel} this item?`;
+        
+        modal.style.display = 'block';
+    }
+
+    // Function to close the modal
+    function closeModal(modalId) {
+        var modal = document.getElementById(modalId);
+        modal.style.display = 'none';
+    }
+</script>
+
+{% endfor %}
+{%endblock content%}

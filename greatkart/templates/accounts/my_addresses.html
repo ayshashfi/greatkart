@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="address-container">
+    <h4 class="mb-6">Saved Addresses:</h4>
+    {% for address in saved_addresses %}
+        <div id="address-card-{{ address.id }}" class="address-card mb-4 p-3 border rounded">
+            <strong class="text-uppercase">{{ address.first_name }} {{ address.last_name }}</strong><br>
+            <div class="address-details">
+                <p>{{ address.address_line_1 }}, {{ address.address_line_2 }}</p>
+                <p>{{ address.city }}, {{ address.state }}, {{ address.country }}</p>
+                <p>Email: {{ address.email }}</p>
+                <p>Phone: {{ address.phone }}</p>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm mt-2" onclick="editAddress('{{ address.id }}')">Edit</button>
+            <button type="button" class="btn btn-danger btn-sm mt-2" onclick="deleteAddress('{{ address.id }}')">Delete</button>
+        </div>
+    {% endfor %}
+</div>
+
+<div class="modal fade" id="editAddressModal" tabindex="-1" role="dialog" aria-labelledby="editAddressModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editAddressModalLabel">Edit Address</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="editAddressForm">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="editFirstName">First Name</label>
+            <input type="text" class="form-control" id="editFirstName" name="editFirstName">
+          </div>
+          <div class="form-group">
+            <label for="editLastName">Last Name</label>
+            <input type="text" class="form-control" id="editLastName" name="editLastName">
+          </div>
+          <div class="form-group">
+            <label for="editPhone">Phone</label>
+            <input type="text" class="form-control" id="editPhone" name="editPhone">
+          </div>
+          <div class="form-group">
+            <label for="editEmail">Email</label>
+            <input type="email" class="form-control" id="editEmail" name="editEmail">
+          </div>
+          <div class="form-group">
+            <label for="editAddressLine1">Address Line 1</label>
+            <input type="text" class="form-control" id="editAddressLine1" name="editAddressLine1">
+          </div>
+          <div class="form-group">
+            <label for="editAddressLine2">Address Line 2</label>
+            <input type="text" class="form-control" id="editAddressLine2" name="editAddressLine2">
+          </div>
+          <div class="form-group">
+            <label for="editCountry">Country</label>
+            <input type="text" class="form-control" id="editCountry" name="editCountry">
+          </div>
+          <div class="form-group">
+            <label for="editState">State</label>
+            <input type="text" class="form-control" id="editState" name="editState">
+          </div>
+          <div class="form-group">
+            <label for="editCity">City</label>
+            <input type="text" class="form-control" id="editCity" name="editCity">
+          </div>
+          <div class="form-group">
+            <label for="editPincode">Pincode</label>
+            <input type="text" class="form-control" id="editPincode" name="editPincode">
+          </div>
+          <div class="form-group">
+            <label for="editOrderNote">Order Note</label>
+            <input type="text" class="form-control" id="editOrderNote" name="editOrderNote">
+          </div>
+
+          <input type="hidden" id="editAddressId" name="editAddressId">
+
+          <button type="button" class="btn btn-primary" onclick="saveEditedAddress()">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    function editAddress(addressId) {
+        $.ajax({
+            url: '{% url "get_address_details" %}',
+            method: 'GET',
+            data: {
+                address_id: addressId,
+            },
+            dataType: 'json',
+            success: function (data) {
+                $('#editFirstName').val(data.first_name);
+                $('#editLastName').val(data.last_name);
+                $('#editPhone').val(data.phone);
+                $('#editEmail').val(data.email);
+                $('#editAddressLine1').val(data.address_line_1);
+                $('#editAddressLine2').val(data.address_line_2);
+                $('#editCountry').val(data.country);
+                $('#editState').val(data.state);
+                $('#editCity').val(data.city);
+                $('#editPincode').val(data.pincode);
+                $('#editOrderNote').val(data.order_note);
+                $('#editAddressId').val(addressId);
+
+                $('#editAddressModal').modal('show');
+            },
+            error: function (error) {
+                console.log('Error fetching address details:', error);
+            }
+        });
+    }
+
+    function saveEditedAddress() {
+        var editedData = {
+            address_id: $('#editAddressId').val(),
+            first_name: $('#editFirstName').val(),
+            last_name: $('#editLastName').val(),
+            phone: $('#editPhone').val(),
+            email: $('#editEmail').val(),
+            address_line_1: $('#editAddressLine1').val(),
+            address_line_2: $('#editAddressLine2').val(),
+            country: $('#editCountry').val(),
+            state: $('#editState').val(),
+            city: $('#editCity').val(),
+            pincode: $('#editPincode').val(),
+            order_note: $('#editOrderNote').val(),
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        };
+    
+        $.ajax({
+            url: '{% url "save_edited_address" %}',
+            method: 'POST',
+            data: editedData,
+            dataType: 'json',
+            success: function (data) {
+                console.log('Address edited successfully');
+                $('#editAddressModal').modal('hide');
+    
+                // Update the corresponding elements on the page
+                var addressId = $('#editAddressId').val();
+                var addressCard = $('#address-card-' + addressId);
+                addressCard.find('.text-uppercase').text(editedData.first_name + ' ' + editedData.last_name);
+                addressCard.find('.address-details p:eq(0)').text(editedData.address_line_1 + ', ' + editedData.address_line_2);
+                // Update other elements as needed
+    
+                // Trigger a custom event for address update
+                var event = new CustomEvent('addressUpdated', {
+                    detail: { addressId: addressId }
+                });
+                document.dispatchEvent(event);
+            },
+            error: function (error) {
+                console.log('Error saving edited address:', error);
+            }
+        });
+    }
+    function deleteAddress(addressId) {
+      console.log('Deleting address:', addressId);
+  
+      $.ajax({
+          url: '{% url "delete_address" %}',  // Replace with the actual URL you defined in urls.py
+          method: 'POST',
+          data: {
+              address_id: addressId,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+          },
+          dataType: 'json',
+          success: function(data) {
+              console.log('Address deleted successfully:', data);
+              // Remove the corresponding address card from the UI or perform other handling
+              $('#address-card-' + addressId).remove();
+          },
+          error: function(error) {
+              console.log('Error deleting address:', error);
+          }
+      });
+  }
+  
+  
+</script>
+<style>
+    .address-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 600px;
+      margin: auto;
+    }
+  
+    .address-card {
+      width: 100%; /* Ensure address cards take the full width */
+      max-width: 600px; /* Adjust the maximum width as needed */
+      box-sizing: border-box; /* Include padding and border in the width calculation */
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px; /* Add some margin between address cards */
+    }
+  
+    .address-details {
+      margin-bottom: 10px;
+    }
+  </style>
+  
+{% endblock %}
